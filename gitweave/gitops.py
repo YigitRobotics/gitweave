@@ -129,9 +129,11 @@ def apply_plan(
     # a second time with just --push to publish commits that were already
     # created by an earlier --execute run, without needing to redo them.
     if push:
-        push_args = ["push", remote]
-        if branch:
-            push_args.append(branch)
+        # -u/--set-upstream so this works whether or not the branch already
+        # has a tracking upstream configured (first push to a fresh repo
+        # otherwise fails with "has no upstream branch").
+        current_branch = branch or _run_git(repo, ["branch", "--show-current"]).stdout.strip()
+        push_args = ["push", "--set-upstream", remote, current_branch]
         _run_git(repo, push_args)
 
     return results

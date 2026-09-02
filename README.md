@@ -51,44 +51,63 @@ yavaş ama tam işlevsel).
 
 ## Kullanım
 
-### 1. Analiz (salt okunur, git'e dokunmaz)
+### En basit yol: `run`
 
+```bash
+cd my-project
+git init          # daha önce yapmadıysan
+gitweave run .
+```
+
+Projeyi tarar, planı önizler, sana `[y/N]` ile onay sorar, onaylarsan
+commit'ler. Author bilgisi `git config user.name`/`user.email`'den otomatik
+alınır — ayrıca belirtmen gerekmez.
+
+```bash
+gitweave run . --push          # onaydan sonra push de eder
+gitweave run . --push -y       # onay sormadan direkt commit + push
+```
+
+### Daha kontrollü yol: `analyze` → `plan` → `apply`
+
+Planı JSON olarak inceleyip elle düzenlemek istersen bu üçlü daha uygun.
+
+**1. Analiz (salt okunur, git'e dokunmaz)**
 ```bash
 gitweave analyze ./my-project
 ```
-
 Dosya sayısı, satır sayısı, dosya türü dağılımı ve `history` modunun bu
 proje için mantıklı olup olmadığını gösterir.
 
-### 2. Plan oluştur
-
+**2. Plan oluştur**
 ```bash
 gitweave plan ./my-project --mode today --out plan.json
 ```
-
 `plan.json` içinde her commit için hangi dosyaların, hangi mesajla, hangi
-tarihle gideceği yazılıdır. Git'e hiçbir şey yazılmaz — önce inceleyin.
+tarihle gideceği yazılıdır. Git'e hiçbir şey yazılmaz — önce inceleyin,
+isterseniz elle düzenleyin.
 
-### 3. Uygula
-
+**3. Uygula**
 ```bash
-# önce dry-run (varsayılan davranış):
-gitweave apply ./my-project --plan plan.json --author-name "Ad Soyad" --author-email "you@example.com"
+# önce dry-run (varsayılan davranış, author bilgisi de otomatik git config'ten):
+gitweave apply ./my-project --plan plan.json
 
 # gerçekten commit'lemek için:
-gitweave apply ./my-project --plan plan.json --author-name "Ad Soyad" --author-email "you@example.com" --execute
+gitweave apply ./my-project --plan plan.json --execute
 
 # commit + push (aynı anda):
-gitweave apply ./my-project --plan plan.json --author-name "Ad Soyad" --author-email "you@example.com" --execute --push
+gitweave apply ./my-project --plan plan.json --execute --push
 
 # ya da önce --execute ile commit'le, sonra ayrı bir çağrıda sadece push et
 # (aynı plan dosyasıyla, --execute vermeden --push vermek yeterli;
 # zaten commit'lenmiş gruplar otomatik atlanır, tekrar commit denenmez):
-gitweave apply ./my-project --plan plan.json --author-name "Ad Soyad" --author-email "you@example.com" --push
+gitweave apply ./my-project --plan plan.json --push
 ```
 
 `--plan` verilmezse `apply` komutu planı o an oluşturup uygular
-(`--mode`, `--max-files` vb. parametreleriyle).
+(`--mode`, `--max-files` vb. parametreleriyle). `--author-name`/
+`--author-email` vermezseniz `git config user.name`/`user.email`
+kullanılır; hiçbiri yoksa açık hata verir.
 
 ## Nasıl gruplanıyor?
 
